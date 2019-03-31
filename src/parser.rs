@@ -176,7 +176,7 @@ pub fn parse_text(text: &String) -> Vec<cmd::Command> {
 			com = " ";
 			int = parse_num(c).1;
 		}
-		let com = cmd::new(com.to_string(),hex,int,rep,unset);
+		let com = cmd::Command::new(com.to_string(),hex,int,rep,unset);
 		comms.push(com);
 	}
 	comms
