@@ -1,5 +1,5 @@
-extern crate meval;
-extern crate regex;
+use meval;
+use regex;
 use regex::Regex;
 use super::cmd;
 // Parses all numbers, with defaults if errors.
@@ -168,8 +168,8 @@ pub fn parse_text(text: &String) -> Vec<cmd::Command> {
 			_ => ()
 		}
 		match c.as_ref() {
-			"x" => {comms.push(cmd::new(c.to_string(),[0;4],0,0,true)); continue},
-			"y" => {comms.push(cmd::new(c.to_string(),[0;4],0,0,true)); continue},
+			"x" => {comms.push(cmd::Command::new(c.to_string(),[0;4],0,0,true)); continue},
+			"y" => {comms.push(cmd::Command::new(c.to_string(),[0;4],0,0,true)); continue},
 			_ => ()
 		}
 		if can_be_num {

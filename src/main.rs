@@ -1,14 +1,14 @@
 // Needs to be able to save the canvas, in whatever form
-extern crate meval;
+use std::io;
+use meval;
 mod canvas;
 mod cmd;
 mod pointer;
 mod parser;
 mod display;
-use std::io;
 fn main() {
 	// The canvas we will draw on
-	let mut main_canvas = canvas::new(16, 16);
+	let mut main_canvas = canvas::Canvas::new(16, 16);
 	// The 2d pointer we will use to draw on the canvas
 	let mut main_pointer = pointer::new(&main_canvas);
 	loop {

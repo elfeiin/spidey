@@ -9,15 +9,15 @@ pub struct Command {
 	pub unset: bool,
 }
 impl Command {
-	pub fn new(v: String, h: [u8;4], i: isize, r: usize, u: bool) -> Command {
-		Command {
-			verb: v,
-			hex: h,
-			int: i,
-			rep: r,
-			unset: u,
-		}
-	}
+    pub fn new(verb: String, hex: [u8;4], int: isize, rep: usize, unset: bool) -> Self {
+        Command {
+            verb,
+            hex,
+            int,
+            rep,
+            unset
+        }
+    }
 }
 // The fact that this struct has all Copy-able primitives and so can have that attribute applied
 // Makes me VERY happy C:

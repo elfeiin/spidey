@@ -6,6 +6,13 @@ pub struct Canvas {
 	pub buffer: Vec<Vec<[u8;4]>>,
 }
 impl Canvas {
+	pub fn new(width: isize, height: isize) -> Self {
+		Canvas {
+			width,
+			height,
+			buffer: vec![vec![[0u8;4];width.abs() as usize];height.abs() as usize],
+		}
+	}
 	// Set some 2d location in the buffer to given [rgba]
 	pub fn put(&mut self, p: &Pointer, hex: [u8;4]) -> &Self {
 		self.buffer[p.y as usize][p.x as usize] = hex;
@@ -36,12 +43,5 @@ impl Canvas {
 		self.buffer.resize(h, vec![[0u8;4];self.width as usize]);
 		p.blank(self);
 		self
-	}
-}
-pub fn new(w: isize, h: isize) -> Canvas {
-	Canvas {
-		width: w,
-		height: h,
-		buffer: vec![vec![[0u8;4];w.abs() as usize];h.abs() as usize],
 	}
 }
