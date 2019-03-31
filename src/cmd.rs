@@ -48,66 +48,66 @@ pub fn run(comms: &Vec<Command>, c: &mut Canvas, p: &mut Pointer) {
 	let mut repeat_table: Vec<Looper> = vec!();
 	while i < comms.len() {
 		let cmd = &comms[i];
-		match cmd.verb.as_ref() {
+		match cmd.verb().as_ref() {
 			"r" => {
-				draw_color(cmd.hex, cmd.rep, c, p);
+				draw_color(cmd.hex(), cmd.rep, c, p);
 			},
 			"y" => {
-				draw_color(cmd.hex, cmd.rep, c, p);
+				draw_color(cmd.hex(), cmd.rep, c, p);
 			},
 			"g" => {
-				draw_color(cmd.hex, cmd.rep, c, p);
+				draw_color(cmd.hex(), cmd.rep, c, p);
 			},
 			"c" => {
-				draw_color(cmd.hex, cmd.rep, c, p);
+				draw_color(cmd.hex(), cmd.rep, c, p);
 			},
 			"b" => {
-				draw_color(cmd.hex, cmd.rep, c, p);
+				draw_color(cmd.hex(), cmd.rep, c, p);
 			},
 			"m" => {
-				draw_color(cmd.hex, cmd.rep, c, p);
+				draw_color(cmd.hex(), cmd.rep, c, p);
 			},
 			"w" => {
-				draw_color(cmd.hex, cmd.rep, c, p);
+				draw_color(cmd.hex(), cmd.rep, c, p);
 			},
 			"." => {
-				draw_color(cmd.hex, cmd.rep, c, p);
+				draw_color(cmd.hex(), cmd.rep, c, p);
 			},
 			"#" => {
-				draw_color(cmd.hex, cmd.rep, c, p);
+				draw_color(cmd.hex(), cmd.rep, c, p);
 			},
 			" " => {
-				p.slide(c, cmd.int, 0);
+				p.slide(c, cmd.int(), 0);
 			},
 			"v" => {
-				p.slide(c, 0, cmd.int);
+				p.slide(c, 0, cmd.int());
 			},
 			"s" => {
-				if cmd.unset {
+				if cmd.unset() {
 					p.set_virtual_left(0);
 				} else {
-					p.set_virtual_left(cmd.int);
+					p.set_virtual_left(cmd.int());
 				}
 			},
 			"e" => {
-				if cmd.unset {
+				if cmd.unset() {
 					p.set_virtual_right(c.width());
 				} else {
-					p.set_virtual_right(cmd.int);
+					p.set_virtual_right(cmd.int());
 				}
 			},
 			"S" => {
-				if cmd.unset {
+				if cmd.unset() {
 					p.set_virtual_top(0);
 				} else {
-					p.set_virtual_top(cmd.int);
+					p.set_virtual_top(cmd.int());
 				}
 			},
 			"E" => {
-				if cmd.unset {
+				if cmd.unset() {
 					p.set_virtual_bottom(c.height());
 				} else {
-					p.set_virtual_bottom(cmd.int);
+					p.set_virtual_bottom(cmd.int());
 				}
 			},
 			"X" => {
@@ -119,7 +119,7 @@ pub fn run(comms: &Vec<Command>, c: &mut Canvas, p: &mut Pointer) {
 			"[" => {
 				repeat_table.push(Looper {
 					index: i+1,
-					remaining: cmd.rep,
+					remaining: cmd.rep(),
 				});
 			},
 			"]" => {

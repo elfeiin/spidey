@@ -25,8 +25,9 @@ impl Canvas {
 	}
 	// These two change the width and height of the canvas, with a &Pointer to update in addition
 	pub fn set_width(&mut self, p: &mut Pointer, w: usize) -> &Self {
+		let mut w = w;
 		if w == 0 {
-			let w = 1;
+			w = 1;
 		}
 		self.width = w as isize;
 		for v in self.buffer.iter_mut() {
@@ -36,8 +37,9 @@ impl Canvas {
 		self
 	}
 	pub fn set_height(&mut self, p: &mut Pointer, h: usize) -> &Self {
+		let mut h = h;
 		if h == 0 {
-			let h = 1;
+			h = 1;
 		}
 		self.height = h as isize;
 		self.buffer.resize(h, vec![[0u8;4];self.width as usize]);

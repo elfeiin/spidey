@@ -131,18 +131,18 @@ pub fn parse_text(text: &String) -> Vec<cmd::Command> {
 			Some(l) => {
 				can_be_num = false;
 				let l = l.as_str();
-				let the_split = c.split(l).collect::<Vec<&str>>();
+				let mut the_split = c.split(l).collect::<Vec<&str>>();
 				let mut lum: Tone = Tone::Mid;
 				match the_split[0].rfind("l") {
 					Some(_) => {
-						let the_split = &the_split[..the_split.len()-1];
+						the_split = the_split[..the_split.len()-1].to_vec();
 						lum = Tone::Light;
 					},
 					_ => (),
 				}
 				match the_split[0].rfind("d") {
 					Some(_) => {
-						let the_split = &the_split[..the_split.len()-1];
+						the_split = the_split[..the_split.len()-1].to_vec();
 						lum = Tone::Dark;
 					},
 					_ => (),

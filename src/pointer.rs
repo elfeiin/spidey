@@ -58,11 +58,13 @@ impl Pointer {
 	}
 	// Same as move_pos() but reacts to direction changes
 	pub fn slide(&mut self, c: &Canvas, r: isize, d: isize) -> &Self {
+		let mut r = r;
+		let mut d = d;
 		if self.reverse_move_x {
-			let r = -r;
+			r = -r;
 		}
 		if self.reverse_move_y {
-			let d = -d;
+			d = -d;
 		}
 		self.move_pos(c,r,d);
 		self

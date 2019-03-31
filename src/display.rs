@@ -11,7 +11,7 @@ pub fn display_canvas(c: &Canvas) {
 				[0,0,255,0] => print!("b "),
 				[255,0,255,0] => print!("m "),
 				[255,255,255,0] => print!("r "),
-				_ => print!("."),
+				_ => print!(". "),
 			}
 		}
 		println!();
