@@ -8,21 +8,23 @@ pub struct Command {
 	pub rep: usize,
 	pub unset: bool,
 }
+impl Command {
+	pub fn new(v: String, h: [u8;4], i: isize, r: usize, u: bool) -> Command {
+		Command {
+			verb: v,
+			hex: h,
+			int: i,
+			rep: r,
+			unset: u,
+		}
+	}
+}
 // The fact that this struct has all Copy-able primitives and so can have that attribute applied
 // Makes me VERY happy C:
 #[derive(Debug, Copy, Clone, PartialEq, Eq)]
 struct Looper {
 	pub index: usize,
 	pub remaining: usize,
-}
-pub fn new(v: String, h: [u8;4], i: isize, r: usize, u: bool) -> Command {
-	Command {
-		verb: v,
-		hex: h,
-		int: i,
-		rep: r,
-		unset: u,
-	}
 }
 // Parse each command and run a specific match based on the Command's verb
 // Can repeat a block of commands. Yes.
