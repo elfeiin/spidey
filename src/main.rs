@@ -1,6 +1,5 @@
 // Needs to be able to save the canvas, in whatever form
 use std::io;
-use meval;
 mod canvas;
 mod cmd;
 mod pointer;
@@ -24,8 +23,8 @@ fn main() {
 			let split = input.split(" ").collect::<Vec<&str>>();
 			let num = parser::parse_num(&split[1]).0;
 			match split[0] {
-				"width" => {main_canvas.width(&mut main_pointer,num);},
-				"height" => {main_canvas.height(&mut main_pointer,num);},
+				"width" => {main_canvas.set_width(&mut main_pointer,num);},
+				"height" => {main_canvas.set_height(&mut main_pointer,num);},
 				_ => ()
 			}
 			continue

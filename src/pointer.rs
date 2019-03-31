@@ -13,8 +13,8 @@ pub struct Pointer {
 impl Pointer {
 	// This sets the Pointer position
 	pub fn set_pos(&mut self, c: &Canvas, r: isize, d: isize) -> &Self {
-		self.y = d.abs().max(0).min(c.height-1);
-		self.x = r.abs().max(0).min(c.width-1);
+		self.y = d.abs().max(0).min(c.height()-1);
+		self.x = r.abs().max(0).min(c.width()-1);
 		self
 	}
 	// Moves the pointer in x, y directions
@@ -34,7 +34,7 @@ impl Pointer {
 			}
 		} else {
 			if (x + r) < min_x {
-				x = c.width - (r.abs()%max_x);
+				x = c.width() - (r.abs()%max_x);
 				self.slide(c,0,-1);
 			} else {
 				x += r;
@@ -48,7 +48,7 @@ impl Pointer {
 			}
 		} else {
 			if (y + d) < min_y {
-				y = c.height - (d.abs()%max_y);
+				y = c.height() - (d.abs()%max_y);
 			} else {
 				y += d;
 			}
@@ -101,9 +101,9 @@ impl Pointer {
 		self.reverse_move_x = false;
 		self.reverse_move_y = false;
 		self.top = 0;
-		self.bottom = c.height;
+		self.bottom = c.height();
 		self.left = 0;
-		self.right = c.width;
+		self.right = c.width();
 		self
 	}
 }
@@ -114,8 +114,8 @@ pub fn new(c: &Canvas) -> Pointer {
 		reverse_move_x: false,
 		reverse_move_y: false,
 		top: 0,
-		bottom: c.height,
+		bottom: c.height(),
 		left: 0,
-		right: c.width,
+		right: c.width(),
 	}
 }

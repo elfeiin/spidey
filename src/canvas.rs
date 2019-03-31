@@ -1,9 +1,9 @@
 use super::pointer::*;
 // The Canvas struct. Has width and height. Has [rgba] buffer.
 pub struct Canvas {
-	pub width: isize,
-	pub height: isize,
-	pub buffer: Vec<Vec<[u8;4]>>,
+	width: isize,
+	height: isize,
+	buffer: Vec<Vec<[u8;4]>>,
 }
 impl Canvas {
 	pub fn new(width: isize, height: isize) -> Self {
@@ -24,7 +24,7 @@ impl Canvas {
 		self
 	}
 	// These two change the width and height of the canvas, with a &Pointer to update in addition
-	pub fn width(&mut self, p: &mut Pointer, w: usize) -> &Self {
+	pub fn set_width(&mut self, p: &mut Pointer, w: usize) -> &Self {
 		if w == 0 {
 			let w = 1;
 		}
@@ -35,7 +35,7 @@ impl Canvas {
 		p.blank(self);
 		self
 	}
-	pub fn height(&mut self, p: &mut Pointer, h: usize) -> &Self {
+	pub fn set_height(&mut self, p: &mut Pointer, h: usize) -> &Self {
 		if h == 0 {
 			let h = 1;
 		}
@@ -43,5 +43,14 @@ impl Canvas {
 		self.buffer.resize(h, vec![[0u8;4];self.width as usize]);
 		p.blank(self);
 		self
+	}
+	pub fn width(&self) -> isize {
+		self.width
+	}
+	pub fn height(&self) -> isize {
+		self.height
+	}
+	pub fn buffer(&self) -> Vec<Vec<[u8;4]>> {
+		self.buffer.to_vec()
 	}
 }

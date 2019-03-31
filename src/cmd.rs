@@ -2,11 +2,11 @@ use super::canvas::*;
 use super::pointer::*;
 // The command struct
 pub struct Command {
-	pub verb: String,
-	pub hex: [u8;4],
-	pub int: isize,
-	pub rep: usize,
-	pub unset: bool,
+	verb: String,
+	hex: [u8;4],
+	int: isize,
+	rep: usize,
+	unset: bool,
 }
 impl Command {
     pub fn new(verb: String, hex: [u8;4], int: isize, rep: usize, unset: bool) -> Self {
@@ -18,6 +18,21 @@ impl Command {
             unset
         }
     }
+	pub fn verb(&self) -> String {
+		self.verb.to_string()
+	}
+	pub fn hex(&self) -> [u8;4] {
+		self.hex
+	}
+	pub fn int(&self) -> isize {
+		self.int
+	}
+	pub fn rep(&self) -> usize {
+		self.rep
+	}
+	pub fn unset(&self) -> bool {
+		self.unset
+	}
 }
 // The fact that this struct has all Copy-able primitives and so can have that attribute applied
 // Makes me VERY happy C:
@@ -76,7 +91,7 @@ pub fn run(comms: &Vec<Command>, c: &mut Canvas, p: &mut Pointer) {
 			},
 			"e" => {
 				if cmd.unset {
-					p.set_virtual_right(c.width);
+					p.set_virtual_right(c.width());
 				} else {
 					p.set_virtual_right(cmd.int);
 				}
@@ -90,7 +105,7 @@ pub fn run(comms: &Vec<Command>, c: &mut Canvas, p: &mut Pointer) {
 			},
 			"E" => {
 				if cmd.unset {
-					p.set_virtual_bottom(c.height);
+					p.set_virtual_bottom(c.height());
 				} else {
 					p.set_virtual_bottom(cmd.int);
 				}

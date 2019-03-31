@@ -1,7 +1,7 @@
 use super::canvas::*;
 // Err um WIP
 pub fn display_canvas(c: &Canvas) {
-	for y in c.buffer.iter() {
+	for y in c.buffer().iter() {
 		for x in y.iter() {
 			match x {
 				[255,0,0,0] => print!("r "),
