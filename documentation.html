@@ -75,34 +75,15 @@
       Welcome to Text2Canvas!
     </span>
     <p>
-      Text2Canvas is an awesome, open source program written in Javascript to make it easier to use the Piet Programming Language by David Morgan-Mar.<br>
-      Namely, to make it easier, it limits the amount of mouse precision required to properly and quickly code in Piet by enabling the user to do everything they can do in a normal image editing program by using text commands.
-      This is not intended to be the textual version of Piet. Rather, it is simply a way to draw images using text geared toward programming in Piet. Besides, it's easier just to interpret an image itself. Yeesh.
-      Feel free to copy the program and modify it as you please.
+      SPIDEY is an IDE for the Piet programming language.<br>
+      It doesn't do much yet.
     </p>
-    <p>
-      All text refers to T2C itself, not this page.
-    </p>
-    <span class='subtitle'>
-      Page functionality:
-    </span>
-    <br>
-    <div>
-      Above the text area are 5 number inputs and a save button.<br>
-      The number inputs can be typed into or the blue and red buttons can be engaged to change the inputs' values.<br>
-      The first and second input change the canvas image's x and y positions respectively.<br>
-      The third and fourth change the dimension.<br>
-      The fifth changes the scale of the pixels.<br>
-      You can also click and drag on the canvas to move the canvas image.<br>
-      The save button opens a new tab containing your picture. You can select between BMP and PNG file types.<br>
-      The help button opens this page.
-    </div>
     <br>
     <span class='subtitle'>
       Commands:
     </span>
     <p>
-      All commands are entered into the text area on the left.<br>
+      All commands are entered into the terminal, for now. They must be padded with at least one space on both sides, unless adding arguments.<br>
       The program works by using a 2D pointer to place pixels on a canvas, initially starting at the top-left. One creates images using commands that draw text and manipulate the pointer. When using only drawing commands, the pointer is automatically moved to the right and reregistered back at the left edge when it reaches the right edge. This behavior can be modified through the use of certain commands.
     </p>
     <div>
@@ -120,8 +101,8 @@
         . draws a black pixel
       </div>
       <p>
-        Tip #1: Any number before any command but # and 3# repeats that command that many times minus one. # and 3# can be repeated using [ and ], see below. The math symbols -, +, * and / works as expected.<br>
-        Tip #2: Commands that draw will naturally move the canvas pointer to the right, or to the left edge and down when it reaches the canvas edge.
+        Tip #1: Any number before any command repeats that command that many times minus one. The math symbols -, +, * and / works as expected.<br>
+        Tip #2: Commands that draw will naturally move the canvas pointer to the right or left and wrap up or down.
       </p>
       <span class='section special'>
         Special Commands
@@ -129,11 +110,9 @@
       <div>
         l makes the next command draw a lighter pixel if it is a color command<br>
         d makes the next command draw a darker pixel if it is a color command<br>
-        <span class='rainbow'>#</span> draws a 6-byte hex color value Ex: #ff00ff<br>
-        <span class='rainbow'>3#</span> draws a 3-byte hex color value Ex: 3#Fc3<br>
-        <span class='rainbow'>4#</span> draws an 8-byte hex color and alpha channel value. 00 is fully transparent, ff is fully opaque. Ex: 4#FF000088<br>
-        [ begins loop<br>
-        ] ends loop
+        <span class='rainbow'>#</span> draws a hex color value. Works like CSS, kinda. Transparency coming soon. Ex: #ff00ff<br>
+        [ begins command loop<br>
+        ] ends command loop
       </div>
       <p>
         Tip #4: Loops can be nested. To change the number of iterations, just put a number before any [.
@@ -142,11 +121,8 @@
         Pixel Pointer Commands
       </span>
       <div>
-        The space character moves the pixel pointer to the right (compare to &gt;)<br>
-        &lt; moves the pointer left<br>
-        > right<br>
-        ^ up<br>
-        v down<br>
+          Any number padded by spaces moves the pointer that number of pixels.
+        v Any number before this symbol and padded by spaces moves the pointer vertically that number of pixels.<br>
         e sets the virtual right edge of the canvas to the pointer's x. If there is number before, instead sets it to the virtual left edge plus that number<br>
         s sets the virtual left edge of the canvas to the pointer's x. If there is number before, instead sets it to that number<br>
         E sets the virtual bottom edge<br>
@@ -158,13 +134,13 @@
       <span class='section'>
         Comments
       </span>
-      <div>
+      <--!<div>
         {} contains a multiline comment<br>
         | denotes a single line comment
       </div>
       <p>
         Tip #6: These commands are used to comment out text.
-      </p>
+      </p>-->
       </div>
       <p>
         Tip #7: XD (recommended use).
