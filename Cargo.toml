@@ -1,0 +1,9 @@
+[package]
+name = "spidey"
+version = "0.1.0"
+authors = ["main"]
+edition = "2018"
+
+[dependencies]
+regex = "1"
+meval = "0.2"
