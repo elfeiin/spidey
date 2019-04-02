@@ -18,8 +18,8 @@ impl Command {
             unset
         }
     }
-	pub fn verb(&self) -> String {
-		self.verb.to_string()
+	pub fn verb(&self) -> &str {
+		&self.verb
 	}
 	pub fn hex(&self) -> [u8;4] {
 		self.hex
@@ -38,8 +38,19 @@ impl Command {
 // Makes me VERY happy C:
 #[derive(Debug, Copy, Clone, PartialEq, Eq)]
 struct Looper {
-	pub index: usize,
-	pub remaining: usize,
+	index: usize,
+	remaining: usize,
+}
+impl Looper {
+	pub fn index(&self) -> usize {
+		self.index
+	}
+	pub fn remaining(&self) -> usize {
+		self.remaining
+	}
+	pub fn decrease(&mut self) {
+		self.remaining -= 1;
+	}
 }
 // Parse each command and run a specific match based on the Command's verb
 // Can repeat a block of commands. Yes.
@@ -77,10 +88,10 @@ pub fn run(comms: &Vec<Command>, c: &mut Canvas, p: &mut Pointer) {
 				draw_color(cmd.hex(), cmd.rep, c, p);
 			},
 			" " => {
-				p.slide(c, cmd.int(), 0);
+				p.slide(cmd.int(), 0);
 			},
 			"v" => {
-				p.slide(c, 0, cmd.int());
+				p.slide(0, cmd.int());
 			},
 			"s" => {
 				if cmd.unset() {
@@ -118,19 +129,20 @@ pub fn run(comms: &Vec<Command>, c: &mut Canvas, p: &mut Pointer) {
 			},
 			"[" => {
 				repeat_table.push(Looper {
-					index: i+1,
-					remaining: cmd.rep(),
+					index: i,
+					remaining: cmd.rep() - 1,
 				});
 			},
 			"]" => {
 				match repeat_table.last() {
 					Some(_) => {
-						let mut last = repeat_table[repeat_table.len()-1];
-						if last.remaining > 0 {
-							i = last.index;
-							last.remaining -= 1;
+						let ilen = repeat_table.len()-1;
+						let last = &mut repeat_table[ilen];
+						if last.remaining() > 0 {
+							i = last.index();
+							last.decrease();
 						} else {
-							repeat_table.remove(repeat_table.len()-1);
+							repeat_table.remove(ilen);
 						}
 					}
 					_ => (),
@@ -145,6 +157,6 @@ pub fn run(comms: &Vec<Command>, c: &mut Canvas, p: &mut Pointer) {
 fn draw_color(color: [u8;4], r: usize, c: &mut Canvas, p: &mut Pointer) {
 	for _i in 0..r {
 		c.put(p, color);
-		p.slide(c,1,0);
+		p.slide(1,0);
 	}
 }

@@ -7,9 +7,9 @@ mod parser;
 mod display;
 fn main() {
 	// The canvas we will draw on
-	let mut main_canvas = canvas::Canvas::new(16, 16);
+	let mut main_canvas = canvas::Canvas::new(4, 4);
 	// The 2d pointer we will use to draw on the canvas
-	let mut main_pointer = pointer::new(&main_canvas);
+	let mut main_pointer = pointer::Pointer::new(&main_canvas);
 	loop {
 		// Uses terminal input for now
 		let mut input = String::new();
@@ -23,11 +23,10 @@ fn main() {
 			let split = input.split(" ").collect::<Vec<&str>>();
 			let num = parser::parse_num(&split[1]).0;
 			match split[0] {
-				"width" => {main_canvas.set_width(&mut main_pointer,num);},
-				"height" => {main_canvas.set_height(&mut main_pointer,num);},
+				"width" => {main_canvas.set_width(&mut main_pointer,num);continue},
+				"height" => {main_canvas.set_height(&mut main_pointer,num);continue},
 				_ => ()
 			}
-			continue
 		}
 		// Reinitialize the canvas buffer to black ([0_u8;4])
 		main_canvas.blank();

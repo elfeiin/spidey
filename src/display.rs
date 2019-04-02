@@ -1,9 +1,11 @@
 use super::canvas::*;
 // Err um WIP
 pub fn display_canvas(c: &Canvas) {
-	for y in c.buffer().iter() {
-		for x in y.iter() {
-			match x {
+	println!();
+	let w = c.width() as usize;
+	for i in (0..c.buffer().len()).step_by(w) {
+		for d in 0..w {
+			match c.buffer()[i + d] {
 				[255,0,0,0] => print!("r "),
 				[255,255,0,0] => print!("y "),
 				[0,255,0,0] => print!("g "),
@@ -16,4 +18,5 @@ pub fn display_canvas(c: &Canvas) {
 		}
 		println!();
 	}
+	println!();
 }

@@ -168,8 +168,8 @@ pub fn parse_text(text: &String) -> Vec<cmd::Command> {
 			_ => ()
 		}
 		match c.as_ref() {
-			"x" => {comms.push(cmd::Command::new(c.to_string(),[0;4],0,0,true)); continue},
-			"y" => {comms.push(cmd::Command::new(c.to_string(),[0;4],0,0,true)); continue},
+			"X" => {comms.push(cmd::Command::new(c.to_string(),[0;4],0,0,true)); continue},
+			"Y" => {comms.push(cmd::Command::new(c.to_string(),[0;4],0,0,true)); continue},
 			_ => ()
 		}
 		if can_be_num {
