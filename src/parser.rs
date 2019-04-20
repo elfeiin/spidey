@@ -1,96 +1,19 @@
-use meval;
-use regex;
-use regex::Regex;
 use super::cmd;
-// Parses all numbers, with defaults if errors.
-// The bool tells whether or not a value was actually set during this process.
-pub fn parse_num(s: &str) -> (usize,isize,bool) {
-	let mut u: usize = 1;
-	let mut i: isize = 0;
-	let mut b = true;
-	match meval::eval_str(s) {
-		Ok(n) => {u = n as usize; i = n as isize; b = false;},
-		_ => ()
-	}
-	(u,i,b)
-}
-// Converts a hex string into [rgba] data (I love read that, [rgba] data)
-// Works like CSS, kinda
-fn parse_hex(s: &str) -> ([u8;4],bool) {
-	match s.len() {
-		3 => {
-			let r = match u8::from_str_radix(&format!("{}{}",&s[ ..1],&s[ ..1]),16) {Ok(n) => n, _ => 0_u8};
-			let g = match u8::from_str_radix(&format!("{}{}",&s[1..2],&s[1..2]),16) {Ok(n) => n, _ => 0_u8};
-			let b = match u8::from_str_radix(&format!("{}{}",&s[2.. ],&s[2.. ]),16) {Ok(n) => n, _ => 0_u8};
-			let a = 0u8;
-			([r,g,b,a],false)
-		},
-		6 => {
-			let r = match u8::from_str_radix(&s[ ..2],16) {Ok(n) => n, _ => 0_u8};
-			let g = match u8::from_str_radix(&s[2..4],16) {Ok(n) => n, _ => 0_u8};
-			let b = match u8::from_str_radix(&s[4.. ],16) {Ok(n) => n, _ => 0_u8};
-			let a = 0u8;
-			([r,g,b,a],false)
-		},
-		4 => {
-			let r = match u8::from_str_radix(&format!("{}{}",&s[ ..1],&s[ ..1]),16) {Ok(n) => n, _ => 0_u8};
-			let g = match u8::from_str_radix(&format!("{}{}",&s[1..2],&s[1..2]),16) {Ok(n) => n, _ => 0_u8};
-			let b = match u8::from_str_radix(&format!("{}{}",&s[2..3],&s[2..3]),16) {Ok(n) => n, _ => 0_u8};
-			let a = match u8::from_str_radix(&format!("{}{}",&s[3.. ],&s[3.. ]),16) {Ok(n) => n, _ => 0_u8};
-			([r,g,b,a],false)
-		},
-		8 => {
-			let r = match u8::from_str_radix(&s[ ..2],16) {Ok(n) => n, _ => 0_u8};
-			let g = match u8::from_str_radix(&s[2..4],16) {Ok(n) => n, _ => 0_u8};
-			let b = match u8::from_str_radix(&s[4..6],16) {Ok(n) => n, _ => 0_u8};
-			let a = match u8::from_str_radix(&s[6.. ],16) {Ok(n) => n, _ => 0_u8};
-			([r,g,b,a],false)
-		},
-		_ => ([0;4],true),
-	}
-}
+use regex::Regex;
+use meval;
 enum Tone {
 	Light,
-	Mid,
+	Normal,
 	Dark,
 }
-// Takes a str as input and returns the appropriate [rgba] data
-// Also takes l which is an enum Tone field
-fn get_color(s: &str, l: Tone) -> [u8;4] {
-	let mut max = 255;
-	let mut min = 000;
-	match l {
-		Tone::Light => {
-			min = 192;
-		},
-		Tone::Dark => {
-			max = 192;
-		},
-		_ => ()
-	}
-	match s {
-		"r" => [max,min,min,0],
-		"y" => [max,max,min,0],
-		"g" => [min,max,min,0],
-		"c" => [min,max,max,0],
-		"b" => [min,min,max,0],
-		"m" => [max,min,max,0],
-		"w" => [max,max,max,0],
-		 _  => [min,min,min,0],
-	}
-}
-// Parses a string and returns a vec of Commands
-// I'm not that good at making parsers, lol. I realize this is a mess. It's my mess.... c:
-// *Consider making each match arm return its own command and giving each match arm its own arguments
-// to modify and whatnot
-pub fn parse_text(text: &String) -> Vec<cmd::Command> {
+pub fn parse(text: &String) -> Vec<cmd::Command> {
 	let mut comms = vec!();
 	let color = Regex::new(r"[rygcbmw.]").unwrap();
 	let position = Regex::new(r"[vseSE]").unwrap();
 	let words = text.split_whitespace().collect::<Vec<&str>>();
 	for c in words.iter() {
 		let mut com = "";
-		let mut hex: [u8;4] = [0;4];
+		let mut hex: [f32;4] = [0.0;4];
 		let mut int: isize = 0;
 		let mut rep: usize = 1;
 		let mut unset = true;
@@ -132,7 +55,7 @@ pub fn parse_text(text: &String) -> Vec<cmd::Command> {
 				can_be_num = false;
 				let l = l.as_str();
 				let mut the_split = c.split(l).collect::<Vec<&str>>();
-				let mut lum: Tone = Tone::Mid;
+				let mut lum: Tone = Tone::Normal;
 				match the_split[0].rfind("l") {
 					Some(_) => {
 						the_split = the_split[..the_split.len()-1].to_vec();
@@ -168,8 +91,8 @@ pub fn parse_text(text: &String) -> Vec<cmd::Command> {
 			_ => ()
 		}
 		match c.as_ref() {
-			"X" => {comms.push(cmd::Command::new(c.to_string(),[0;4],0,0,true)); continue},
-			"Y" => {comms.push(cmd::Command::new(c.to_string(),[0;4],0,0,true)); continue},
+			"X" => {comms.push(cmd::Command::new(c.to_string(),[0.0;4],0,0,true)); continue},
+			"Y" => {comms.push(cmd::Command::new(c.to_string(),[0.0;4],0,0,true)); continue},
 			_ => ()
 		}
 		if can_be_num {
@@ -180,4 +103,144 @@ pub fn parse_text(text: &String) -> Vec<cmd::Command> {
 		comms.push(com);
 	}
 	comms
+}
+fn get_color(s: &str, l: Tone) -> [f32;4] {
+	let mut max: f32 = 1.0;
+	let mut min: f32 = 0.0;
+	match l {
+		Tone::Light => {
+			min = 192.0/255.0;
+		},
+		Tone::Dark => {
+			max = 192.0/255.0;
+		},
+		_ => ()
+	}
+	match s {
+		"r" => [max,min,min,1.0_f32],
+		"y" => [max,max,min,1.0_f32],
+		"g" => [min,max,min,1.0_f32],
+		"c" => [min,max,max,1.0_f32],
+		"b" => [min,min,max,1.0_f32],
+		"m" => [max,min,max,1.0_f32],
+		"w" => [max,max,max,1.0_f32],
+		 _  => [min,min,min,1.0_f32],
+	}
+}
+pub fn parse_num(s: &str) -> (usize,isize,bool) {
+	let mut u: usize = 1;
+	let mut i: isize = 0;
+	let mut b = true;
+	match meval::eval_str(s) {
+		Ok(n) => {u = n as usize; i = n as isize; b = false;},
+		_ => ()
+	}
+	(u,i,b)
+}
+fn parse_hex(s: &str) -> ([f32;4],bool) {
+	let mut r: f32 = 1.0;
+	let mut g: f32 = 1.0;
+	let mut b: f32 = 1.0;
+	let mut a: f32 = 1.0;
+	let mut b00 = true;
+	match s.len() {
+		3 => {
+			match u8::from_str_radix(&format!("{}{}",&s[ ..1],&s[ ..1]),16) {
+				Ok(n) => {
+					r = n as f32/255.0;
+				},
+				_ => ()
+			};
+			match u8::from_str_radix(&format!("{}{}",&s[1..2],&s[1..2]),16) {
+				Ok(n) => {
+					g = n as f32/255.0;
+				},
+				_ => ()
+			};
+			match u8::from_str_radix(&format!("{}{}",&s[2.. ],&s[2.. ]),16) {
+				Ok(n) => {
+					b = n as f32/255.0;
+				},
+				_ => ()
+			};
+			b00 = false;
+		},
+		6 => {
+			match u8::from_str_radix(&s[ ..2],16) {
+				Ok(n) => {
+					r = n as f32/255.0;
+				},
+				_ => ()
+			};
+			match u8::from_str_radix(&s[2..4],16) {
+				Ok(n) => {
+					g = n as f32/255.0;
+				},
+				_ => ()
+			};
+			match u8::from_str_radix(&s[4.. ],16) {
+				Ok(n) => {
+					b = n as f32/255.0;
+				},
+				_ => ()
+			};
+			b00 = false;
+		},
+		4 => {
+			match u8::from_str_radix(&format!("{}{}",&s[ ..1],&s[ ..1]),16) {
+				Ok(n) => {
+					r = n as f32/255.0;
+				},
+				_ => ()
+			};
+			match u8::from_str_radix(&format!("{}{}",&s[1..2],&s[1..2]),16) {
+				Ok(n) => {
+					g = n as f32/255.0;
+				},
+				_ => ()
+			};
+			match u8::from_str_radix(&format!("{}{}",&s[2..3],&s[2..3]),16) {
+				Ok(n) => {
+					b = n as f32/255.0;
+				},
+				_ => ()
+			};
+			match u8::from_str_radix(&format!("{}{}",&s[3.. ],&s[3.. ]),16) {
+				Ok(n) => {
+					a = n as f32/255.0;
+				},
+				_ => ()
+			};
+			b00 = false;
+		},
+		8 => {
+			match u8::from_str_radix(&s[ ..2],16) {
+				Ok(n) => {
+					r = n as f32/255.0;
+				},
+				_ => ()
+			};
+			match u8::from_str_radix(&s[2..4],16) {
+				Ok(n) => {
+					g = n as f32/255.0;
+				},
+				_ => ()
+			};
+			match u8::from_str_radix(&s[4..6],16) {
+				Ok(n) => {
+					b = n as f32/255.0;
+				},
+				_ => ()
+			};
+			match u8::from_str_radix(&s[6.. ],16) {
+				Ok(n) => {
+					a = n as f32/255.0;
+				},
+				_ => ()
+			};
+			b00 = false;
+		},
+		_ => (),
+	}
+	([r,g,b,a],b00)
 }

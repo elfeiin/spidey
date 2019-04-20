@@ -1,15 +1,13 @@
-use super::canvas::*;
 use super::pointer::*;
-// The command struct
 pub struct Command {
 	verb: String,
-	hex: [u8;4],
+	hex: [f32;4],
 	int: isize,
 	rep: usize,
 	unset: bool,
 }
 impl Command {
-    pub fn new(verb: String, hex: [u8;4], int: isize, rep: usize, unset: bool) -> Self {
+    pub fn new(verb: String, hex: [f32;4], int: isize, rep: usize, unset: bool) -> Self {
         Command {
             verb,
             hex,
@@ -21,7 +19,7 @@ impl Command {
 	pub fn verb(&self) -> &str {
 		&self.verb
 	}
-	pub fn hex(&self) -> [u8;4] {
+	pub fn hex(&self) -> [f32;4] {
 		self.hex
 	}
 	pub fn int(&self) -> isize {
@@ -34,8 +32,6 @@ impl Command {
 		self.unset
 	}
 }
-// The fact that this struct has all Copy-able primitives and so can have that attribute applied
-// Makes me VERY happy C:
 #[derive(Debug, Copy, Clone, PartialEq, Eq)]
 struct Looper {
 	index: usize,
@@ -52,41 +48,13 @@ impl Looper {
 		self.remaining -= 1;
 	}
 }
-// Parse each command and run a specific match based on the Command's verb
-// Can repeat a block of commands. Yes.
-pub fn run(comms: &Vec<Command>, c: &mut Canvas, p: &mut Pointer) {
+pub fn run(comms: &Vec<Command>, p: &mut Pointer) -> Vec<([f32;4],[f64;4])> {
+	let mut to_draw: Vec<([f32;4],[f64;4])> = vec![];
 	let mut i = 0;
 	let mut repeat_table: Vec<Looper> = vec!();
 	while i < comms.len() {
 		let cmd = &comms[i];
 		match cmd.verb().as_ref() {
-			"r" => {
-				draw_color(cmd.hex(), cmd.rep, c, p);
-			},
-			"y" => {
-				draw_color(cmd.hex(), cmd.rep, c, p);
-			},
-			"g" => {
-				draw_color(cmd.hex(), cmd.rep, c, p);
-			},
-			"c" => {
-				draw_color(cmd.hex(), cmd.rep, c, p);
-			},
-			"b" => {
-				draw_color(cmd.hex(), cmd.rep, c, p);
-			},
-			"m" => {
-				draw_color(cmd.hex(), cmd.rep, c, p);
-			},
-			"w" => {
-				draw_color(cmd.hex(), cmd.rep, c, p);
-			},
-			"." => {
-				draw_color(cmd.hex(), cmd.rep, c, p);
-			},
-			"#" => {
-				draw_color(cmd.hex(), cmd.rep, c, p);
-			},
 			" " => {
 				p.slide(cmd.int(), 0);
 			},
@@ -102,7 +70,7 @@ pub fn run(comms: &Vec<Command>, c: &mut Canvas, p: &mut Pointer) {
 			},
 			"e" => {
 				if cmd.unset() {
-					p.set_virtual_right(c.width());
+					p.set_virtual_right(p.width() as isize);
 				} else {
 					p.set_virtual_right(cmd.int());
 				}
@@ -116,13 +84,14 @@ pub fn run(comms: &Vec<Command>, c: &mut Canvas, p: &mut Pointer) {
 			},
 			"E" => {
 				if cmd.unset() {
-					p.set_virtual_bottom(c.height());
+					p.set_virtual_bottom(p.height() as isize);
 				} else {
 					p.set_virtual_bottom(cmd.int());
 				}
 			},
 			"X" => {
 				p.flip_reverse_move_x();
+
 			},
 			"Y" => {
 				p.flop_reverse_move_y();
@@ -148,15 +117,12 @@ pub fn run(comms: &Vec<Command>, c: &mut Canvas, p: &mut Pointer) {
 					_ => (),
 				}
 			},
-			 _  => (),
+			 _  => {
+			 	to_draw.push((cmd.hex(), [p.x()*20.0,p.y()*20.0,20.0,20.0]));
+			 	p.slide(1,0);
+		 	},
 		}
 		i += 1;
 	}
-}
-// Puts color on a Canvas c:
-fn draw_color(color: [u8;4], r: usize, c: &mut Canvas, p: &mut Pointer) {
-	for _i in 0..r {
-		c.put(p, color);
-		p.slide(1,0);
-	}
+	to_draw
 }

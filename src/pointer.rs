@@ -1,53 +1,47 @@
-use super::canvas::*;
-// The pointer struct. Used to control where on the canvas pixels are put
 #[derive(Debug, Copy, Clone, PartialEq, Eq)]
 pub struct Pointer {
 	x: isize,
 	y: isize,
 	reverse_move_x: bool,
 	reverse_move_y: bool,
+	width: isize,
+	height: isize,
 	top: isize,
 	bottom: isize,
 	left: isize,
 	right: isize,
 }
 impl Pointer {
-	pub fn new(c: &Canvas) -> Self {
+	pub fn new(width: isize, height: isize) -> Self {
 		Pointer {
 			x: 0,
 			y: 0,
 			reverse_move_x: false,
 			reverse_move_y: false,
+			width: width,
+			height: height,
 			top: 0,
-			bottom: c.height(),
+			bottom: width,
 			left: 0,
-			right: c.width(),
+			right: height,
 		}
 	}
-	// This sets the Pointer position
 	pub fn set_pos(&mut self, r: isize, d: isize) -> &Self {
 		self.x = r;
 		self.y = d;
 		self
 	}
-	// Moves the pointer in x, y directions
 	pub fn move_pos(&mut self, r: isize, d: isize) -> &Self {
-		// print!("{} {} |",r,d);
 		let max_x = self.right() - 1;
 		let min_x = self.left();
 		let max_y = self.bottom() - 1;
 		let min_y = self.top();
 		let mut d = d;
-		
-		let mut x = self.x();
-		let mut y = self.y();
-		
-		// print!(" {} {} |",x,y);
-		
+		let mut x = self.x() as isize;
+		let mut y = self.y() as isize;
 		let mut r_unit = 0;
 		if r != 0 {r_unit = r/r.abs();}
 		let r_unit = r_unit;
-		
 		let hi = r.max(0);
 		let lo = r.min(0);
 		for _i in lo..hi {
@@ -61,11 +55,9 @@ impl Pointer {
 				d -= 1;
 			}
 		}
-		
 		let mut d_unit = 0;
 		if d != 0 {d_unit = d/d.abs();}
 		let d_unit = d_unit;
-		
 		let hi = d.max(0);
 		let lo = d.min(0);
 		for _i in lo..hi {
@@ -77,11 +69,9 @@ impl Pointer {
 				y = max_y;
 			}
 		}
-		// println!(" {} {}|",x,y);
 		self.set_pos(x,y);
 		self
 	}
-	// Same as move_pos() but reacts to direction changes
 	pub fn slide(&mut self, r: isize, d: isize) -> &Self {
 		let mut r = r;
 		let mut d = d;
@@ -94,8 +84,6 @@ impl Pointer {
 		self.move_pos(r,d);
 		self
 	}
-	// Reverse move means that when the input is 1, slide() will pass -1 to move_pos()
-	// This is useful when we want the pointer to have reverse behavior, for whatever reason
 	pub fn flip_reverse_move_x(&mut self) -> &Self {
 		self.reverse_move_x = !self.reverse_move_x;
 		self
@@ -104,7 +92,6 @@ impl Pointer {
 		self.reverse_move_y = !self.reverse_move_y;
 		self
 	}
-	// Virtual edges allow for modifying only a portion of the canvas, or, working vertically
 	pub fn set_virtual_left(&mut self, n: isize) -> &Self {
 		self.left = n;
 		self
@@ -121,29 +108,52 @@ impl Pointer {
 		self.bottom = self.top + n;
 		self
 	}
-	// Blanks the Pointer
-	pub fn blank(&mut self, c: &Canvas) -> &Self {
+	pub fn blank(&mut self) -> &Self {
 		self.x = 0;
 		self.y = 0;
 		self.reverse_move_x = false;
 		self.reverse_move_y = false;
 		self.top = 0;
-		self.bottom = c.height();
+		self.bottom = self.height() as isize;
 		self.left = 0;
-		self.right = c.width();
+		self.right = self.width() as isize;
 		self
 	}
-	pub fn x(&self) -> isize {
-		self.x
+	pub fn set_width(&mut self, w: isize) -> &Self {
+		let mut w = w;
+		if w == 0 {
+			w = 1;
+		}
+		self.width = w;
+		self.blank();
+		self
 	}
-	pub fn y(&self) -> isize {
-		self.y
+	pub fn set_height(&mut self, h: isize) -> &Self {
+		let mut h = h;
+		if h == 0 {
+			h = 1;
+		}
+		self.height = h;
+		self.blank();
+		self
+	}
+	pub fn x(&self) -> f64 {
+		self.x as f64
+	}
+	pub fn y(&self) -> f64 {
+		self.y as f64
 	}
 	pub fn reverse_move_x(&self) -> bool {
 		self.reverse_move_x
 	}
 	pub fn reverse_move_y(&self) -> bool {
 		self.reverse_move_y
+	}
+	pub fn width(&self) -> isize {
+		self.width
+	}
+	pub fn height(&self) -> isize {
+		self.height
 	}
 	pub fn top(&self) -> isize {
 		self.top
