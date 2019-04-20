@@ -1,4 +1,6 @@
 # spidey
 Work in progress.
 Takes text input and turns it into an image.
-Currently can only output to terminal. help.html is incomplete.
+Outputs to window so far.
+Working on inputs.
+help.html is incomplete.
