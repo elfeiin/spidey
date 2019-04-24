@@ -1,4 +1,4 @@
-#[derive(Debug, Copy, Clone, PartialEq, Eq)]
+#[derive(Debug, Clone)]
 pub struct Pointer {
 	x: isize,
 	y: isize,
@@ -12,26 +12,25 @@ pub struct Pointer {
 	right: isize,
 }
 impl Pointer {
-	pub fn new(width: isize, height: isize) -> Self {
+	pub fn new() -> Self {
 		Pointer {
 			x: 0,
 			y: 0,
 			reverse_move_x: false,
 			reverse_move_y: false,
-			width: width,
-			height: height,
+			width: 16,
+			height: 16,
 			top: 0,
-			bottom: width,
+			bottom: 16,
 			left: 0,
-			right: height,
+			right: 16,
 		}
 	}
-	pub fn set_pos(&mut self, r: isize, d: isize) -> &Self {
+	pub fn set_pos(&mut self, r: isize, d: isize) {
 		self.x = r;
 		self.y = d;
-		self
 	}
-	pub fn move_pos(&mut self, r: isize, d: isize) -> &Self {
+	pub fn move_pos(&mut self, r: isize, d: isize) {
 		let max_x = self.right() - 1;
 		let min_x = self.left();
 		let max_y = self.bottom() - 1;
@@ -70,9 +69,8 @@ impl Pointer {
 			}
 		}
 		self.set_pos(x,y);
-		self
 	}
-	pub fn slide(&mut self, r: isize, d: isize) -> &Self {
+	pub fn slide(&mut self, r: isize, d: isize) {
 		let mut r = r;
 		let mut d = d;
 		if self.reverse_move_x() {
@@ -82,33 +80,26 @@ impl Pointer {
 			d = -d;
 		}
 		self.move_pos(r,d);
-		self
 	}
-	pub fn flip_reverse_move_x(&mut self) -> &Self {
+	pub fn flip_reverse_move_x(&mut self) {
 		self.reverse_move_x = !self.reverse_move_x;
-		self
 	}
-	pub fn flop_reverse_move_y(&mut self) -> &Self {
+	pub fn flop_reverse_move_y(&mut self) {
 		self.reverse_move_y = !self.reverse_move_y;
-		self
 	}
-	pub fn set_virtual_left(&mut self, n: isize) -> &Self {
+	pub fn set_virtual_left(&mut self, n: isize) {
 		self.left = n;
-		self
 	}
-	pub fn set_virtual_right(&mut self, n: isize) -> &Self {
+	pub fn set_virtual_right(&mut self, n: isize) {
 		self.right = self.left + n;
-		self
 	}
-	pub fn set_virtual_top(&mut self, n: isize) -> &Self {
+	pub fn set_virtual_top(&mut self, n: isize) {
 		self.top = n;
-		self
 	}
-	pub fn set_virtual_bottom(&mut self, n: isize) -> &Self {
+	pub fn set_virtual_bottom(&mut self, n: isize) {
 		self.bottom = self.top + n;
-		self
 	}
-	pub fn blank(&mut self) -> &Self {
+	pub fn blank(&mut self) {
 		self.x = 0;
 		self.y = 0;
 		self.reverse_move_x = false;
@@ -117,25 +108,20 @@ impl Pointer {
 		self.bottom = self.height() as isize;
 		self.left = 0;
 		self.right = self.width() as isize;
-		self
 	}
-	pub fn set_width(&mut self, w: isize) -> &Self {
+	pub fn set_width(&mut self, w: isize) {
 		let mut w = w;
 		if w == 0 {
 			w = 1;
 		}
 		self.width = w;
-		self.blank();
-		self
 	}
-	pub fn set_height(&mut self, h: isize) -> &Self {
+	pub fn set_height(&mut self, h: isize) {
 		let mut h = h;
 		if h == 0 {
 			h = 1;
 		}
 		self.height = h;
-		self.blank();
-		self
 	}
 	pub fn x(&self) -> f64 {
 		self.x as f64

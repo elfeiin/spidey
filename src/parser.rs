@@ -1,246 +1,368 @@
-use super::cmd;
-use regex::Regex;
+use super::cmd::*;
 use meval;
-enum Tone {
+#[derive(Debug, Clone, PartialEq, Eq)]
+pub enum Tone {
 	Light,
 	Normal,
 	Dark,
 }
-pub fn parse(text: &String) -> Vec<cmd::Command> {
-	let mut comms = vec!();
-	let color = Regex::new(r"[rygcbmw.]").unwrap();
-	let position = Regex::new(r"[vseSE]").unwrap();
-	let words = text.split_whitespace().collect::<Vec<&str>>();
-	for c in words.iter() {
-		let mut com = "";
-		let mut hex: [f32;4] = [0.0;4];
-		let mut int: isize = 0;
-		let mut rep: usize = 1;
-		let mut unset = true;
-		let mut can_be_num = true;
-		match c.rfind("[") {
-			Some(_) => {
-				can_be_num = false;
-				let the_split = c.split("[").collect::<Vec<&str>>();
-				rep = match parse_num(&the_split[0]) {
-					(n,_,b) => { unset = unset || b; n }
-				};
-				com = "[";
-			},
-			_ => (),
+#[derive(Debug, Clone, PartialEq, Eq)]
+pub enum Comment {
+	Nope,
+	Line,
+	Mult,
+}
+#[derive(Debug, Clone)]
+pub struct Parser {
+	cmd: char,
+	hex: String,
+	num: String,
+	sharps: bool,
+	tone: Tone,
+	comment: Comment,
+	cmds: Vec<Command>,
+}
+impl Parser {
+	pub fn new() -> Parser {
+		Parser {
+			cmd: char::from(0u8),
+			hex: String::new(),
+			num: String::new(),
+			sharps: false,
+			tone: Tone::Normal,
+			comment: Comment::Nope,
+			cmds: vec!(),
 		}
-		match c.rfind("]") {
-			Some(_) => {
-				can_be_num = false;
-				com = "]"
-			},
-			_ => (),
+	}
+	pub fn reset(&mut self) {
+		self.cmd = char::from(0u8);
+		self.hex = String::new();
+		self.num = String::new();
+		self.sharps = false;
+		self.tone = Tone::Normal;
+		self.comment = Comment::Nope;
+	}
+	pub fn set_cmd(&mut self, a: char) {
+		self.cmd = a;
+	}
+	pub fn set_hex(&mut self, a: String) {
+		self.hex = a;
+	}
+	pub fn set_num(&mut self, a: String) {
+		self.num = a;
+	}
+	pub fn push_hex(&mut self, a: char) {
+		self.hex.push(a);
+	}
+	pub fn push_num(&mut self, a: char) {
+		self.num.push(a);
+	}
+	pub fn set_sharps(&mut self, a: bool) {
+		self.sharps = a;
+	}
+	pub fn set_tone(&mut self, a: Tone) {
+		self.tone = a;
+	}
+	pub fn set_comment(&mut self, a: Comment) {
+		self.comment = a;
+	}
+	pub fn cmd(&self) -> char {
+		self.cmd
+	}
+	pub fn hex(&self) -> String {
+		self.hex.to_owned()
+	}
+	pub fn num(&self) -> String {
+		self.num.to_owned()
+	}
+	pub fn sharps(&self) -> bool {
+		self.sharps
+	}
+	pub fn tone(&self) -> Tone {
+		self.tone.to_owned()
+	}
+	pub fn comment(&self) -> Comment {
+		self.comment.to_owned()
+	}
+	pub fn cmds(&self) -> Vec<Command> {
+		self.cmds.to_owned()
+	}
+	pub fn put(&mut self) {
+		if self.cmd() != char::from(0u8) {
+			let int = parse_num(self.num()).0;
+			let rep = parse_num(self.num()).1;
+			if self.sharps {
+				self.cmds.push(Command::new(
+					self.cmd(),
+					parse_hex(self.hex()),
+					int,
+					rep,
+					self.hex() == String::new() && self.num() == String::new()
+				));
+			} else {
+				self.cmds.push(Command::new(
+					self.cmd(),
+					get_color(self.hex(), self.tone()),
+					int,
+					rep,
+					self.hex() == String::new() && self.num() == String::new()
+				));
+			}
 		}
-		match c.rfind("#") {
-			Some(_) => {
-				can_be_num = false;
-				let the_split = c.split("#").collect::<Vec<&str>>();
-				rep = match parse_num(&the_split[0]) {
-					(n,_,b) => { unset = unset || b; n }
-				};
-				hex = match parse_hex(&the_split[1]) {
-					(n,b) => { unset = unset || b; n }
-				};
-				com = "#";
-			},
-			_ => (),
-		}
-		match color.find(c) {
-			Some(l) => {
-				can_be_num = false;
-				let l = l.as_str();
-				let mut the_split = c.split(l).collect::<Vec<&str>>();
-				let mut lum: Tone = Tone::Normal;
-				match the_split[0].rfind("l") {
-					Some(_) => {
-						the_split = the_split[..the_split.len()-1].to_vec();
-						lum = Tone::Light;
+	}
+	pub fn parse(&mut self, s: &String) -> &Self {
+		self.cmds = vec!();
+		self.reset();
+		let num_list: String = String::from("0123456789-+/*");
+		let hex_list: String = String::from("0123456789abcdef");
+		let color_list: String = String::from("rgbcymw.");
+		let control_list = String::from("v>[]esESXY");
+		let mut chars = s.chars();
+		while let Some(c) = chars.next() {
+			match c {
+				'|' => {
+					if self.comment() == Comment::Nope {
+						self.set_comment(Comment::Line);
+					}
+					self.reset();
+				},
+				'{' => {
+					if self.comment() == Comment::Nope {
+						self.set_comment(Comment::Mult);
+					}
+					self.reset();
+				},
+				'}' => {
+					self.set_comment(Comment::Nope);
+					self.reset();
+				},
+				' ' => {
+					self.put();
+					self.reset();
+				},
+				'\n' => {
+					if self.comment() == Comment::Nope {
+						self.set_cmd('v');
+						self.set_num('1'.to_string());
+						self.put();
+					} else {
+						if self.comment() == Comment::Line {
+							self.set_comment(Comment::Nope);
+						}
+					}
+					self.reset();
+				},
+				_ => (),
+			}
+			if self.comment == Comment::Nope {
+				if self.sharps() {
+					if let Some(_) = hex_list.find(c) {
+						self.push_hex(c);
+						continue;
+					}
+				} else {
+					if let Some(_) = num_list.find(c) {
+						self.push_num(c);
+						continue;
+					}
+				}
+				match c {
+					'l' => {
+						self.set_tone(Tone::Light);
+					},
+					'd' => {
+						self.set_tone(Tone::Dark);
+					},
+					'#' => {
+						self.set_cmd('#');
+						self.set_sharps(true);
 					},
 					_ => (),
 				}
-				match the_split[0].rfind("d") {
-					Some(_) => {
-						the_split = the_split[..the_split.len()-1].to_vec();
-						lum = Tone::Dark;
-					},
-					_ => (),
+				if let Some(_) = color_list.find(c) {
+					self.set_cmd('#');
+					self.set_hex(c.to_string());
+					self.put();
+					self.reset();
 				}
-				rep = match parse_num(&the_split[0]) {
-					(n,_,b) => { unset = unset || b; n }
-				};
-				hex = get_color(l,lum);
-				com = l;
-			},
-			_ => ()
+				if let Some(_) = control_list.find(c) {
+					self.set_cmd(c);
+					self.put();
+					self.reset();
+				}
+			}
 		}
-		match position.find(c) {
-			Some(l) => {
-				can_be_num = false;
-				let l = l.as_str();
-				let the_split = c.split(l).collect::<Vec<&str>>();
-				int = match parse_num(&the_split[1]) {
-					(_,n,b) => { unset = unset || b; n }
-				};
-				com = l;
-			},
-			_ => ()
-		}
-		match c.as_ref() {
-			"X" => {comms.push(cmd::Command::new(c.to_string(),[0.0;4],0,0,true)); continue},
-			"Y" => {comms.push(cmd::Command::new(c.to_string(),[0.0;4],0,0,true)); continue},
-			_ => ()
-		}
-		if can_be_num {
-			com = " ";
-			int = parse_num(c).1;
-		}
-		let com = cmd::Command::new(com.to_string(),hex,int,rep,unset);
-		comms.push(com);
-	}
-	comms
-}
-fn get_color(s: &str, l: Tone) -> [f32;4] {
-	let mut max: f32 = 1.0;
-	let mut min: f32 = 0.0;
-	match l {
-		Tone::Light => {
-			min = 192.0/255.0;
-		},
-		Tone::Dark => {
-			max = 192.0/255.0;
-		},
-		_ => ()
-	}
-	match s {
-		"r" => [max,min,min,1.0_f32],
-		"y" => [max,max,min,1.0_f32],
-		"g" => [min,max,min,1.0_f32],
-		"c" => [min,max,max,1.0_f32],
-		"b" => [min,min,max,1.0_f32],
-		"m" => [max,min,max,1.0_f32],
-		"w" => [max,max,max,1.0_f32],
-		 _  => [min,min,min,1.0_f32],
+		self.put();
+		self.reset();
+		self
 	}
 }
-pub fn parse_num(s: &str) -> (usize,isize,bool) {
-	let mut u: usize = 1;
-	let mut i: isize = 0;
-	let mut b = true;
-	match meval::eval_str(s) {
-		Ok(n) => {u = n as usize; i = n as isize; b = false;},
-		_ => ()
-	}
-	(u,i,b)
-}
-fn parse_hex(s: &str) -> ([f32;4],bool) {
-	let mut r: f32 = 1.0;
-	let mut g: f32 = 1.0;
-	let mut b: f32 = 1.0;
-	let mut a: f32 = 1.0;
-	let mut b00 = true;
+fn parse_hex(s: String) -> [u8;4] {
+	let mut r: u8 = 255;
+	let mut g: u8 = 255;
+	let mut b: u8 = 255;
+	let mut a: u8 = 255;
 	match s.len() {
-		3 => {
-			match u8::from_str_radix(&format!("{}{}",&s[ ..1],&s[ ..1]),16) {
-				Ok(n) => {
-					r = n as f32/255.0;
-				},
-				_ => ()
-			};
+		3=>{match u8::from_str_radix(&format!("{}{}",&s[ ..1],&s[ ..1]),16) {
+				Ok(n) => {r = n;},_ => ()};
 			match u8::from_str_radix(&format!("{}{}",&s[1..2],&s[1..2]),16) {
-				Ok(n) => {
-					g = n as f32/255.0;
-				},
-				_ => ()
-			};
+				Ok(n) => {g = n;},_ => ()};
 			match u8::from_str_radix(&format!("{}{}",&s[2.. ],&s[2.. ]),16) {
-				Ok(n) => {
-					b = n as f32/255.0;
-				},
-				_ => ()
-			};
-			b00 = false;
-		},
-		6 => {
-			match u8::from_str_radix(&s[ ..2],16) {
-				Ok(n) => {
-					r = n as f32/255.0;
-				},
-				_ => ()
-			};
+				Ok(n) => {b = n;},_ => ()};},
+		6=>{match u8::from_str_radix(&s[ ..2],16) {
+				Ok(n) => {r = n;},_ => ()};
 			match u8::from_str_radix(&s[2..4],16) {
-				Ok(n) => {
-					g = n as f32/255.0;
-				},
-				_ => ()
-			};
+				Ok(n) => {g = n;},_ => ()};
 			match u8::from_str_radix(&s[4.. ],16) {
-				Ok(n) => {
-					b = n as f32/255.0;
-				},
-				_ => ()
-			};
-			b00 = false;
-		},
-		4 => {
-			match u8::from_str_radix(&format!("{}{}",&s[ ..1],&s[ ..1]),16) {
-				Ok(n) => {
-					r = n as f32/255.0;
-				},
-				_ => ()
-			};
+				Ok(n) => {b = n;},_ => ()};},
+		4=>{match u8::from_str_radix(&format!("{}{}",&s[ ..1],&s[ ..1]),16) {
+				Ok(n) => {r = n;},_ => ()};
 			match u8::from_str_radix(&format!("{}{}",&s[1..2],&s[1..2]),16) {
-				Ok(n) => {
-					g = n as f32/255.0;
-				},
-				_ => ()
-			};
+				Ok(n) => {g = n;},_ => ()};
 			match u8::from_str_radix(&format!("{}{}",&s[2..3],&s[2..3]),16) {
-				Ok(n) => {
-					b = n as f32/255.0;
-				},
-				_ => ()
-			};
+				Ok(n) => {b = n;},_ => ()};
 			match u8::from_str_radix(&format!("{}{}",&s[3.. ],&s[3.. ]),16) {
-				Ok(n) => {
-					a = n as f32/255.0;
-				},
-				_ => ()
-			};
-			b00 = false;
-		},
-		8 => {
-			match u8::from_str_radix(&s[ ..2],16) {
-				Ok(n) => {
-					r = n as f32/255.0;
-				},
-				_ => ()
-			};
+				Ok(n) => {a = n;},_ => ()};},
+		8=>{match u8::from_str_radix(&s[ ..2],16) {
+				Ok(n) => {r = n;},_ => ()};
 			match u8::from_str_radix(&s[2..4],16) {
-				Ok(n) => {
-					g = n as f32/255.0;
-				},
-				_ => ()
-			};
+				Ok(n) => {g = n;},_ => ()};
 			match u8::from_str_radix(&s[4..6],16) {
-				Ok(n) => {
-					b = n as f32/255.0;
-				},
-				_ => ()
-			};
+				Ok(n) => {b = n;},_ => ()};
 			match u8::from_str_radix(&s[6.. ],16) {
-				Ok(n) => {
-					a = n as f32/255.0;
-				},
-				_ => ()
-			};
-			b00 = false;
-		},
+				Ok(n) => {a = n;},_ => ()};},
 		_ => (),
 	}
-	([r,g,b,a],b00)
+	[r,g,b,a]
 }
+pub fn parse_num(s: String) -> (isize,usize) {
+	let mut i: isize = 0;
+	let mut u: usize = 1;
+	match meval::eval_str(s) {
+		Ok(n) => {i = n as isize; u = n as usize;},
+		_ => ()
+	}
+	(i,u)
+}
+fn get_color(s: String, l: Tone) -> [u8;4] {
+	let mut max: u8 = 255;
+	let mut min: u8 = 0;
+	match l {
+		Tone::Light => {
+			min = 192;
+		},
+		Tone::Dark => {
+			max = 192;
+		},
+		_ => ()
+	}
+	match s.as_ref() {
+		"r" => [max,min,min,255],
+		"y" => [max,max,min,255],
+		"g" => [min,max,min,255],
+		"c" => [min,max,max,255],
+		"b" => [min,min,max,255],
+		"m" => [max,min,max,255],
+		"w" => [max,max,max,255],
+		 _  => [min,min,min,255],
+	}
+}
+
+// pub fn parse(text: &String) -> Vec<cmd::Command> {
+// 	let mut comms = vec!();
+// 	let color = Regex::new(r'[rygcbmw.]').unwrap();
+// 	let position = Regex::new(r'[vseSE]').unwrap();
+// 	let words = text.split_whitespace().collect::<Vec<&str>>();
+// 	for c in words.iter() {
+// 		let mut com = '';
+// 		let mut hex: [f32;4] = [0.0;4];
+// 		let mut int: isize = 0;
+// 		let mut rep: usize = 1;
+// 		let mut unset = true;
+// 		let mut can_be_num = true;
+// 		match c.rfind('[') {
+// 			Some(_) => {
+// 				can_be_num = false;
+// 				let the_split = c.split('[').collect::<Vec<&str>>();
+// 				rep = match parse_num(&the_split[0]) {
+// 					(n,_,b) => { unset = unset || b; n }
+// 				};
+// 				com = '[';
+// 			},
+// 			_ => (),
+// 		}
+// 		match c.rfind(']') {
+// 			Some(_) => {
+// 				can_be_num = false;
+// 				com = ']'
+// 			},
+// 			_ => (),
+// 		}
+// 		match c.rfind('#') {
+// 			Some(_) => {
+// 				can_be_num = false;
+// 				let the_split = c.split('#').collect::<Vec<&str>>();
+// 				rep = match parse_num(&the_split[0]) {
+// 					(n,_,b) => { unset = unset || b; n }
+// 				};
+// 				hex = match parse_hex(&the_split[1]) {
+// 					(n,b) => { unset = unset || b; n }
+// 				};
+// 				com = '#';
+// 			},
+// 			_ => (),
+// 		}
+// 		match color.find(c) {
+// 			Some(l) => {
+// 				can_be_num = false;
+// 				let l = l.as_str();
+// 				let mut the_split = c.split(l).collect::<Vec<&str>>();
+// 				let mut lum: Tone = Tone::Normal;
+// 				match the_split[0].rfind('l') {
+// 					Some(_) => {
+// 						the_split = the_split[..the_split.len()-1].to_vec();
+// 						lum = Tone::Light;
+// 					},
+// 					_ => (),
+// 				}
+// 				match the_split[0].rfind('d') {
+// 					Some(_) => {
+// 						the_split = the_split[..the_split.len()-1].to_vec();
+// 						lum = Tone::Dark;
+// 					},
+// 					_ => (),
+// 				}
+// 				rep = match parse_num(&the_split[0]) {
+// 					(n,_,b) => { unset = unset || b; n }
+// 				};
+// 				hex = get_color(l,lum);
+// 				com = l;
+// 			},
+// 			_ => ()
+// 		}
+// 		match position.find(c) {
+// 			Some(l) => {
+// 				can_be_num = false;
+// 				let l = l.as_str();
+// 				let the_split = c.split(l).collect::<Vec<&str>>();
+// 				int = match parse_num(&the_split[1]) {
+// 					(_,n,b) => { unset = unset || b; n }
+// 				};
+// 				com = l;
+// 			},
+// 			_ => ()
+// 		}
+// 		match c.as_ref() {
+// 			'X' => {comms.push(cmd::Command::new(c,[0.0;4],0,0,true)); continue},
+// 			'Y' => {comms.push(cmd::Command::new(c,[0.0;4],0,0,true)); continue},
+// 			_ => ()
+// 		}
+// 		if can_be_num {
+// 			com = ' ';
+// 			int = parse_num(c).1;
+// 		}
+// 		let com = cmd::Command::new(com,hex,int,rep,unset);
+// 		comms.push(com);
+// 	}
+// 	comms
+// }

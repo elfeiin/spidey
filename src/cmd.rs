@@ -1,13 +1,16 @@
 use super::pointer::*;
+use super::pyxel::*;
+use super::Screen;
+#[derive(Debug, Clone)]
 pub struct Command {
-	verb: String,
-	hex: [f32;4],
+	verb: char,
+	hex: [u8;4],
 	int: isize,
 	rep: usize,
 	unset: bool,
 }
 impl Command {
-    pub fn new(verb: String, hex: [f32;4], int: isize, rep: usize, unset: bool) -> Self {
+    pub fn new(verb: char, hex: [u8;4], int: isize, rep: usize, unset: bool) -> Self {
         Command {
             verb,
             hex,
@@ -16,10 +19,10 @@ impl Command {
             unset
         }
     }
-	pub fn verb(&self) -> &str {
+	pub fn verb(&self) -> &char {
 		&self.verb
 	}
-	pub fn hex(&self) -> [f32;4] {
+	pub fn hex(&self) -> [u8;4] {
 		self.hex
 	}
 	pub fn int(&self) -> isize {
@@ -48,61 +51,60 @@ impl Looper {
 		self.remaining -= 1;
 	}
 }
-pub fn run(comms: &Vec<Command>, p: &mut Pointer) -> Vec<([f32;4],[f64;4])> {
-	let mut to_draw: Vec<([f32;4],[f64;4])> = vec![];
+pub fn run(comms: &Vec<Command>, pointer: &mut Pointer, screen: &mut Screen) {
 	let mut i = 0;
 	let mut repeat_table: Vec<Looper> = vec!();
 	while i < comms.len() {
 		let cmd = &comms[i];
-		match cmd.verb().as_ref() {
-			" " => {
-				p.slide(cmd.int(), 0);
+		match cmd.verb() {
+			' ' => {
+				pointer.slide(cmd.int(), 0);
 			},
-			"v" => {
-				p.slide(0, cmd.int());
+			'v' => {
+				pointer.slide(0, cmd.int());
 			},
-			"s" => {
+			's' => {
 				if cmd.unset() {
-					p.set_virtual_left(0);
+					pointer.set_virtual_left(0);
 				} else {
-					p.set_virtual_left(cmd.int());
+					pointer.set_virtual_left(cmd.int());
 				}
 			},
-			"e" => {
+			'e' => {
 				if cmd.unset() {
-					p.set_virtual_right(p.width() as isize);
+					pointer.set_virtual_right(pointer.width() as isize);
 				} else {
-					p.set_virtual_right(cmd.int());
+					pointer.set_virtual_right(cmd.int());
 				}
 			},
-			"S" => {
+			'S' => {
 				if cmd.unset() {
-					p.set_virtual_top(0);
+					pointer.set_virtual_top(0);
 				} else {
-					p.set_virtual_top(cmd.int());
+					pointer.set_virtual_top(cmd.int());
 				}
 			},
-			"E" => {
+			'E' => {
 				if cmd.unset() {
-					p.set_virtual_bottom(p.height() as isize);
+					pointer.set_virtual_bottom(pointer.height() as isize);
 				} else {
-					p.set_virtual_bottom(cmd.int());
+					pointer.set_virtual_bottom(cmd.int());
 				}
 			},
-			"X" => {
-				p.flip_reverse_move_x();
+			'X' => {
+				pointer.flip_reverse_move_x();
 
 			},
-			"Y" => {
-				p.flop_reverse_move_y();
+			'Y' => {
+				pointer.flop_reverse_move_y();
 			},
-			"[" => {
+			'[' => {
 				repeat_table.push(Looper {
 					index: i,
 					remaining: cmd.rep() - 1,
 				});
 			},
-			"]" => {
+			']' => {
 				match repeat_table.last() {
 					Some(_) => {
 						let ilen = repeat_table.len()-1;
@@ -117,12 +119,16 @@ pub fn run(comms: &Vec<Command>, p: &mut Pointer) -> Vec<([f32;4],[f64;4])> {
 					_ => (),
 				}
 			},
-			 _  => {
-			 	to_draw.push((cmd.hex(), [p.x()*20.0,p.y()*20.0,20.0,20.0]));
-			 	p.slide(1,0);
+			 '#'  => {
+				let mut k = 0;
+				while k < cmd.rep() {
+				 	screen.add_pyxel(Pyxel::new(cmd.hex(),pointer.x()*20.0,pointer.y()*20.0));
+				 	pointer.slide(1,0);
+				 	k+=1;
+			 	}
 		 	},
+		 	_ => (),
 		}
 		i += 1;
 	}
-	to_draw
 }
