@@ -4,8 +4,8 @@ pub struct Pointer {
 	y: isize,
 	reverse_move_x: bool,
 	reverse_move_y: bool,
-	width: isize,
-	height: isize,
+	width: f64,
+	height: f64,
 	top: isize,
 	bottom: isize,
 	left: isize,
@@ -18,8 +18,8 @@ impl Pointer {
 			y: 0,
 			reverse_move_x: false,
 			reverse_move_y: false,
-			width: 16,
-			height: 16,
+			width: 16.0,
+			height: 16.0,
 			top: 0,
 			bottom: 16,
 			left: 0,
@@ -99,35 +99,37 @@ impl Pointer {
 	pub fn set_virtual_bottom(&mut self, n: isize) {
 		self.bottom = self.top + n;
 	}
-	pub fn blank(&mut self) {
+	pub fn blank(&mut self, w: f64, h: f64) {
 		self.x = 0;
 		self.y = 0;
 		self.reverse_move_x = false;
 		self.reverse_move_y = false;
 		self.top = 0;
+		self.width = w;
+		self.height = h;
 		self.bottom = self.height() as isize;
 		self.left = 0;
 		self.right = self.width() as isize;
 	}
-	pub fn set_width(&mut self, w: isize) {
+	pub fn set_width(&mut self, w: f64) {
 		let mut w = w;
-		if w == 0 {
-			w = 1;
+		if w == 0.0 {
+			w = 1.0;
 		}
 		self.width = w;
 	}
-	pub fn set_height(&mut self, h: isize) {
+	pub fn set_height(&mut self, h: f64) {
 		let mut h = h;
-		if h == 0 {
-			h = 1;
+		if h == 0.0 {
+			h = 1.0;
 		}
 		self.height = h;
 	}
-	pub fn x(&self) -> f64 {
-		self.x as f64
+	pub fn x(&self) -> isize {
+		self.x
 	}
-	pub fn y(&self) -> f64 {
-		self.y as f64
+	pub fn y(&self) -> isize {
+		self.y
 	}
 	pub fn reverse_move_x(&self) -> bool {
 		self.reverse_move_x
@@ -135,10 +137,10 @@ impl Pointer {
 	pub fn reverse_move_y(&self) -> bool {
 		self.reverse_move_y
 	}
-	pub fn width(&self) -> isize {
+	pub fn width(&self) -> f64 {
 		self.width
 	}
-	pub fn height(&self) -> isize {
+	pub fn height(&self) -> f64 {
 		self.height
 	}
 	pub fn top(&self) -> isize {

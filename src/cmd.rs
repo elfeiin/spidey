@@ -51,7 +51,8 @@ impl Looper {
 		self.remaining -= 1;
 	}
 }
-pub fn run(comms: &Vec<Command>, pointer: &mut Pointer, screen: &mut Screen) {
+pub fn run(pointer: &mut Pointer, screen: &mut Screen) {
+	let comms = screen.cmds();
 	let mut i = 0;
 	let mut repeat_table: Vec<Looper> = vec!();
 	while i < comms.len() {
@@ -62,6 +63,10 @@ pub fn run(comms: &Vec<Command>, pointer: &mut Pointer, screen: &mut Screen) {
 			},
 			'v' => {
 				pointer.slide(0, cmd.int());
+			},
+			'n' => {
+				pointer.slide(0, 1);
+				pointer.set_pos(0,pointer.y());
 			},
 			's' => {
 				if cmd.unset() {
@@ -122,7 +127,7 @@ pub fn run(comms: &Vec<Command>, pointer: &mut Pointer, screen: &mut Screen) {
 			 '#'  => {
 				let mut k = 0;
 				while k < cmd.rep() {
-				 	screen.add_pyxel(Pyxel::new(cmd.hex(),pointer.x()*20.0,pointer.y()*20.0));
+				 	screen.add_pyxel(Pyxel::new(cmd.hex(),pointer.x() as f64*20.0,pointer.y() as f64*20.0));
 				 	pointer.slide(1,0);
 				 	k+=1;
 			 	}

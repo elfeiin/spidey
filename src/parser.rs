@@ -142,8 +142,7 @@ impl Parser {
 				},
 				'\n' => {
 					if self.comment() == Comment::Nope {
-						self.set_cmd('v');
-						self.set_num('1'.to_string());
+						self.set_cmd('n');
 						self.put();
 					} else {
 						if self.comment() == Comment::Line {
