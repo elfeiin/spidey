@@ -1,3 +1,5 @@
+// Not a memory pointer (I mean not technically but you get it)
+// Points to a position on a Canvas
 #[derive(Debug, Clone)]
 pub struct Pointer {
 	x: isize,
@@ -11,7 +13,10 @@ pub struct Pointer {
 	left: isize,
 	right: isize,
 }
+
 impl Pointer {
+	
+	// Returns a new pointer. Takes no arguments.
 	pub fn new() -> Self {
 		Pointer {
 			x: 0,
@@ -26,10 +31,34 @@ impl Pointer {
 			right: 16,
 		}
 	}
+	
+	// Returns respective values smh
+	pub fn x(&self) -> isize { self.x }
+	
+	pub fn y(&self) -> isize { self.y }
+	
+	pub fn reverse_move_x(&self) -> bool { self.reverse_move_x }
+	
+	pub fn reverse_move_y(&self) -> bool { self.reverse_move_y }
+	
+	pub fn width(&self) -> f64 { self.width }
+	
+	pub fn height(&self) -> f64 { self.height }
+	
+	pub fn top(&self) -> isize { self.top }
+	
+	pub fn bottom(&self) -> isize { self.bottom }
+	
+	pub fn left(&self) -> isize { self.left }
+	
+	pub fn right(&self) -> isize { self.right }
+	
+	// Sets respective values
 	pub fn set_pos(&mut self, r: isize, d: isize) {
 		self.x = r;
 		self.y = d;
 	}
+	
 	pub fn move_pos(&mut self, r: isize, d: isize) {
 		let max_x = self.right() - 1;
 		let min_x = self.left();
@@ -70,6 +99,7 @@ impl Pointer {
 		}
 		self.set_pos(x,y);
 	}
+	
 	pub fn slide(&mut self, r: isize, d: isize) {
 		let mut r = r;
 		let mut d = d;
@@ -81,24 +111,49 @@ impl Pointer {
 		}
 		self.move_pos(r,d);
 	}
+	
 	pub fn flip_reverse_move_x(&mut self) {
 		self.reverse_move_x = !self.reverse_move_x;
 	}
+	
+	// Purposely spelled differently just to make things difficult
 	pub fn flop_reverse_move_y(&mut self) {
 		self.reverse_move_y = !self.reverse_move_y;
 	}
+	
 	pub fn set_virtual_left(&mut self, n: isize) {
 		self.left = n;
 	}
+	
 	pub fn set_virtual_right(&mut self, n: isize) {
 		self.right = self.left + n;
 	}
+	
 	pub fn set_virtual_top(&mut self, n: isize) {
 		self.top = n;
 	}
+	
 	pub fn set_virtual_bottom(&mut self, n: isize) {
 		self.bottom = self.top + n;
 	}
+	
+	pub fn set_width(&mut self, w: f64) {
+		let mut w = w;
+		if w == 0.0 {
+			w = 1.0;
+		}
+		self.width = w;
+	}
+	
+	pub fn set_height(&mut self, h: f64) {
+		let mut h = h;
+		if h == 0.0 {
+			h = 1.0;
+		}
+		self.height = h;
+	}
+	
+	// Blank the pointer! >:D
 	pub fn blank(&mut self, w: f64, h: f64) {
 		self.x = 0;
 		self.y = 0;
@@ -111,48 +166,5 @@ impl Pointer {
 		self.left = 0;
 		self.right = self.width() as isize;
 	}
-	pub fn set_width(&mut self, w: f64) {
-		let mut w = w;
-		if w == 0.0 {
-			w = 1.0;
-		}
-		self.width = w;
-	}
-	pub fn set_height(&mut self, h: f64) {
-		let mut h = h;
-		if h == 0.0 {
-			h = 1.0;
-		}
-		self.height = h;
-	}
-	pub fn x(&self) -> isize {
-		self.x
-	}
-	pub fn y(&self) -> isize {
-		self.y
-	}
-	pub fn reverse_move_x(&self) -> bool {
-		self.reverse_move_x
-	}
-	pub fn reverse_move_y(&self) -> bool {
-		self.reverse_move_y
-	}
-	pub fn width(&self) -> f64 {
-		self.width
-	}
-	pub fn height(&self) -> f64 {
-		self.height
-	}
-	pub fn top(&self) -> isize {
-		self.top
-	}
-	pub fn bottom(&self) -> isize {
-		self.bottom
-	}
-	pub fn left(&self) -> isize {
-		self.left
-	}
-	pub fn right(&self) -> isize {
-		self.right
-	}
+	
 }

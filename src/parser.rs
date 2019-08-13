@@ -1,17 +1,20 @@
 use super::cmd::*;
 use meval;
+
 #[derive(Debug, Clone, PartialEq, Eq)]
 pub enum Tone {
 	Light,
 	Normal,
 	Dark,
 }
+
 #[derive(Debug, Clone, PartialEq, Eq)]
 pub enum Comment {
 	Nope,
 	Line,
 	Mult,
 }
+
 #[derive(Debug, Clone)]
 pub struct Parser {
 	cmd: char,
@@ -22,7 +25,9 @@ pub struct Parser {
 	comment: Comment,
 	cmds: Vec<Command>,
 }
+
 impl Parser {
+	
 	pub fn new() -> Parser {
 		Parser {
 			cmd: char::from(0u8),
@@ -34,6 +39,7 @@ impl Parser {
 			cmds: vec!(),
 		}
 	}
+	
 	pub fn reset(&mut self) {
 		self.cmd = char::from(0u8);
 		self.hex = String::new();
@@ -42,51 +48,67 @@ impl Parser {
 		self.tone = Tone::Normal;
 		self.comment = Comment::Nope;
 	}
+	
 	pub fn set_cmd(&mut self, a: char) {
 		self.cmd = a;
 	}
+	
 	pub fn set_hex(&mut self, a: String) {
 		self.hex = a;
 	}
+	
 	pub fn set_num(&mut self, a: String) {
 		self.num = a;
 	}
+	
 	pub fn push_hex(&mut self, a: char) {
 		self.hex.push(a);
 	}
+	
 	pub fn push_num(&mut self, a: char) {
 		self.num.push(a);
 	}
+	
 	pub fn set_sharps(&mut self, a: bool) {
 		self.sharps = a;
 	}
+	
 	pub fn set_tone(&mut self, a: Tone) {
 		self.tone = a;
 	}
+	
 	pub fn set_comment(&mut self, a: Comment) {
 		self.comment = a;
 	}
+	
 	pub fn cmd(&self) -> char {
 		self.cmd
 	}
+	
 	pub fn hex(&self) -> String {
 		self.hex.to_owned()
 	}
+	
 	pub fn num(&self) -> String {
 		self.num.to_owned()
 	}
+	
 	pub fn sharps(&self) -> bool {
 		self.sharps
 	}
+	
 	pub fn tone(&self) -> Tone {
 		self.tone.to_owned()
 	}
+	
 	pub fn comment(&self) -> Comment {
 		self.comment.to_owned()
 	}
+	
 	pub fn cmds(&self) -> Vec<Command> {
 		self.cmds.to_owned()
 	}
+	
 	pub fn put(&mut self) {
 		if self.cmd() != char::from(0u8) {
 			let int = parse_num(self.num()).0;
@@ -102,7 +124,7 @@ impl Parser {
 			} else {
 				self.cmds.push(Command::new(
 					self.cmd(),
-					get_color(self.hex(), self.tone()),
+					tone(self.hex(), self.tone()),
 					int,
 					rep,
 					self.hex() == String::new() && self.num() == String::new()
@@ -110,6 +132,7 @@ impl Parser {
 			}
 		}
 	}
+	
 	pub fn parse(&mut self, s: &String) -> &Self {
 		self.cmds = vec!();
 		self.reset();
@@ -195,12 +218,18 @@ impl Parser {
 		self.reset();
 		self
 	}
+	
 }
+
+// Convert a string containing a valid hex value to an array of u8
 fn parse_hex(s: String) -> [u8;4] {
+
 	let mut r: u8 = 255;
 	let mut g: u8 = 255;
 	let mut b: u8 = 255;
 	let mut a: u8 = 255;
+	
+	// Uhhh.....
 	match s.len() {
 		3=>{match u8::from_str_radix(&format!("{}{}",&s[ ..1],&s[ ..1]),16) {
 				Ok(n) => {r = n;},_ => ()};
@@ -232,20 +261,31 @@ fn parse_hex(s: String) -> [u8;4] {
 				Ok(n) => {a = n;},_ => ()};},
 		_ => (),
 	}
-	[r,g,b,a]
+	
+	[r,g,b,a] // Return all our variables, formatted in an array
+	
 }
+
+// Returns a tuple containing the conversion of a string to an isize and the same string to a usize, respectively
 pub fn parse_num(s: String) -> (isize,usize) {
+
 	let mut i: isize = 0;
 	let mut u: usize = 1;
 	match meval::eval_str(s) {
-		Ok(n) => {i = n as isize; u = n as usize;},
+		Ok(n) => {i = n as isize; u = n.abs() as usize;},
 		_ => ()
 	}
+	
 	(i,u)
+	
 }
-fn get_color(s: String, l: Tone) -> [u8;4] {
+
+// Makes a color darker or lighter or does nothing to it
+fn tone(s: String, l: Tone) -> [u8;4] {
+
 	let mut max: u8 = 255;
 	let mut min: u8 = 0;
+	
 	match l {
 		Tone::Light => {
 			min = 192;
@@ -255,6 +295,7 @@ fn get_color(s: String, l: Tone) -> [u8;4] {
 		},
 		_ => ()
 	}
+	
 	match s.as_ref() {
 		"r" => [max,min,min,255],
 		"y" => [max,max,min,255],
@@ -265,7 +306,11 @@ fn get_color(s: String, l: Tone) -> [u8;4] {
 		"w" => [max,max,max,255],
 		 _  => [min,min,min,255],
 	}
+	
 }
+
+
+// Deperecated. TODO: Delete this
 
 // pub fn parse(text: &String) -> Vec<cmd::Command> {
 // 	let mut comms = vec!();
@@ -334,7 +379,7 @@ fn get_color(s: String, l: Tone) -> [u8;4] {
 // 				rep = match parse_num(&the_split[0]) {
 // 					(n,_,b) => { unset = unset || b; n }
 // 				};
-// 				hex = get_color(l,lum);
+// 				hex = tone(l,lum);
 // 				com = l;
 // 			},
 // 			_ => ()
