@@ -1,4 +1,4 @@
-  super::cmd::*;
+use super::cmd::*;
 use meval;
 
 #[derive(Debug, Clone, PartialEq, Eq)]
