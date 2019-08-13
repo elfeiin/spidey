@@ -1,4 +1,4 @@
-use super::cmd::*;
+  super::cmd::*;
 use meval;
 
 #[derive(Debug, Clone, PartialEq, Eq)]
@@ -40,6 +40,22 @@ impl Parser {
 		}
 	}
 	
+	// Return respective values
+	pub fn cmd(&self) -> char { self.cmd }
+	
+	pub fn hex(&self) -> String { self.hex.to_owned() }
+	
+	pub fn num(&self) -> String { self.num.to_owned() }
+	
+	pub fn sharps(&self) -> bool { self.sharps }
+	
+	pub fn tone(&self) -> Tone { self.tone.to_owned() }
+	
+	pub fn comment(&self) -> Comment { self.comment.to_owned() }
+	
+	pub fn cmds(&self) -> Vec<Command> { self.cmds.to_owned() }
+	
+	// Resets the parser
 	pub fn reset(&mut self) {
 		self.cmd = char::from(0u8);
 		self.hex = String::new();
@@ -49,6 +65,7 @@ impl Parser {
 		self.comment = Comment::Nope;
 	}
 	
+	// Set respective values
 	pub fn set_cmd(&mut self, a: char) {
 		self.cmd = a;
 	}
@@ -81,34 +98,7 @@ impl Parser {
 		self.comment = a;
 	}
 	
-	pub fn cmd(&self) -> char {
-		self.cmd
-	}
-	
-	pub fn hex(&self) -> String {
-		self.hex.to_owned()
-	}
-	
-	pub fn num(&self) -> String {
-		self.num.to_owned()
-	}
-	
-	pub fn sharps(&self) -> bool {
-		self.sharps
-	}
-	
-	pub fn tone(&self) -> Tone {
-		self.tone.to_owned()
-	}
-	
-	pub fn comment(&self) -> Comment {
-		self.comment.to_owned()
-	}
-	
-	pub fn cmds(&self) -> Vec<Command> {
-		self.cmds.to_owned()
-	}
-	
+	// Add a command into the list of commands
 	pub fn put(&mut self) {
 		if self.cmd() != char::from(0u8) {
 			let int = parse_num(self.num()).0;
@@ -133,7 +123,9 @@ impl Parser {
 		}
 	}
 	
+	// Takes a string and converts it to commands
 	pub fn parse(&mut self, s: &String) -> &Self {
+	
 		self.cmds = vec!();
 		self.reset();
 		let num_list: String = String::from("0123456789-+/*");
@@ -141,28 +133,35 @@ impl Parser {
 		let color_list: String = String::from("rgbcymw.");
 		let control_list = String::from("v>[]esESXY");
 		let mut chars = s.chars();
+		
 		while let Some(c) = chars.next() {
+		
 			match c {
+			
 				'|' => {
 					if self.comment() == Comment::Nope {
 						self.set_comment(Comment::Line);
 					}
 					self.reset();
 				},
+				
 				'{' => {
 					if self.comment() == Comment::Nope {
 						self.set_comment(Comment::Mult);
 					}
 					self.reset();
 				},
+				
 				'}' => {
 					self.set_comment(Comment::Nope);
 					self.reset();
 				},
+				
 				' ' => {
 					self.put();
 					self.reset();
 				},
+				
 				'\n' => {
 					if self.comment() == Comment::Nope {
 						self.set_cmd('n');
@@ -174,9 +173,13 @@ impl Parser {
 					}
 					self.reset();
 				},
+				
 				_ => (),
+				
 			}
+			
 			if self.comment == Comment::Nope {
+			
 				if self.sharps() {
 					if let Some(_) = hex_list.find(c) {
 						self.push_hex(c);
@@ -188,6 +191,7 @@ impl Parser {
 						continue;
 					}
 				}
+				
 				match c {
 					'l' => {
 						self.set_tone(Tone::Light);
@@ -212,11 +216,15 @@ impl Parser {
 					self.put();
 					self.reset();
 				}
+				
 			}
+			
 		}
+		
 		self.put();
 		self.reset();
 		self
+		
 	}
 	
 }
