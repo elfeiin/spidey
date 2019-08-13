@@ -6,5 +6,5 @@ edition = "2018"
 
 [dependencies]
 meval = "0.2"
-piston_window = "0.89.0"
+piston_window = "*"
 find_folder = "*"
