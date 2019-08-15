@@ -25,7 +25,7 @@ fn main() {
 	
 	//This is kinda like my DOM
 	let base_ui: Vec<element::Element> = vec![
-		element::Element::new(0, "e1".to_string()).with_dim(60.0, 30.0).with_color([0.0, 1.0, 0.0, 1.0]).with_border_sides(Some([1.0,0.0,0.0,1.0])),
+		element::Element::new(0, "e1".to_string()).with_dim(element::Vector::Pc(0.5), element::Vector::Px(30.0)).with_color([0.0, 1.0, 0.0, 1.0]).with_border_sides(Some([1.0,0.0,0.0,1.0]), Some([0.0, 0.0, 1.0, 1.0]), None, Some([0.0, 0.0, 0.0, 1.0])),
 	];
 	
 	while let Some(e) = window.next() {

@@ -53,39 +53,39 @@ impl Element {
 	pub fn text_color(&self) -> [f32; 4] { self.text_color }
 	
 	// Sets the position
-	pub fn with_pos(mut self, x: f64, y: f64) -> Self {
+	pub fn with_pos(mut self, x: Vector, y: Vector) -> Self {
 		self.pos.x = x;
 		self.pos.y = y;
 		self
 	}
 	
 	// Sets the x pos alone
-	pub fn with_x_pos(mut self, x: f64) -> Self {
+	pub fn with_x_pos(mut self, x: Vector) -> Self {
 		self.pos.x = x;
 		self
 	}
 	
 	// Sets the y pos alone
-	pub fn with_y_pos(mut self, y: f64) -> Self {
+	pub fn with_y_pos(mut self, y: Vector) -> Self {
 		self.pos.y = y;
 		self
 	}
 	
 	// Sets the dimensions
-	pub fn with_dim(mut self, x: f64, y: f64) -> Self {
+	pub fn with_dim(mut self, x: Vector, y: Vector) -> Self {
 		self.dim.x = x;
 		self.dim.y = y;
 		self
 	}
 	
 	// Sets the x dim alone
-	pub fn with_x_dim(mut self, x: f64) -> Self {
+	pub fn with_x_dim(mut self, x: Vector) -> Self {
 		self.dim.x = x;
 		self
 	}
 	
 	// Sets the y dim alone
-	pub fn with_y_dim(mut self, y: f64) -> Self {
+	pub fn with_y_dim(mut self, y: Vector) -> Self {
 		self.dim.y = y;
 		self
 	}
@@ -97,8 +97,8 @@ impl Element {
 	}
 	
 	// sets which border sides are visible
-	pub fn with_border_sides(mut self, top: Option<[f32; 4]>) -> Self {
-		self.border.sides = [top, top, top, top];
+	pub fn with_border_sides(mut self, top: Option<[f32; 4]>, bot: Option<[f32; 4]>, lft: Option<[f32; 4]>, rit: Option<[f32; 4]>) -> Self {
+		self.border.sides = [top, bot, lft, rit];
 		self
 	}
 	
@@ -116,24 +116,24 @@ impl Element {
 
 #[derive(Debug, Copy, Clone)]
 pub struct Vec2 {
-	x: f64,
-	y: f64,
+	x: Vector,
+	y: Vector,
 }
 
 impl Vec2 {
 	
 	pub fn new() -> Vec2 {
 		Vec2 {
-			x: 0f64,
-			y: 0f64,
+			x: Vector::Px(0f64),
+			y: Vector::Px(0f64),
 		}
 	}
 	
-	pub fn x(&self) -> f64 {
+	pub fn x(&self) -> Vector {
 		self.x
 	}
 	
-	pub fn y(&self) -> f64 {
+	pub fn y(&self) -> Vector {
 		self.y
 	}
 	
@@ -156,4 +156,10 @@ impl Border {
 		self.sides
 	}
 	
+}
+
+#[derive(Debug, Copy, Clone)]
+pub enum Vector {
+	Px(f64),
+	Pc(f64),
 }

@@ -65,25 +65,58 @@ pub fn draw_ui(w: &mut PistonWindow, e: &Event, base_ui: &Vec<element::Element>)
 	let factory = w.factory.clone();
 	let mut glyphs = Glyphs::new(font, factory, TextureSettings::new()).expect("could not load glyphs");
 	
+	// Some local-global variables- window width and height for scaling. Should use these in drawing base ui as well, smh
+	let width = w.size().width;
+	let height = w.size().height;
 	
 	// Will be used in drawing borders...
 	let patterns: [[f64; 4]; 4] = [
-		[0.0; 4],
-		[0.0; 4],
-		[0.0; 4],
-		[0.0; 4],
+		[0.0, 0.0, 1.0, 0.0],
+		[1.0, 1.0, 0.0, 1.0],
+		[0.0, 1.0, 0.0, 0.0],
+		[1.0, 0.0, 1.0, 1.0],
 	];
 	
 	// The base ui drawing function call
 	w.draw_2d(e, |c, g| {
 		for e in base_ui.iter() {
+			
+			let mut xpos: f64 = 0.0;
+			let mut ypos: f64 = 0.0;
+			let mut xdim: f64 = 0.0;
+			let mut ydim: f64 = 0.0;
+			
+			if let element::Vector::Px(a) = e.pos().x() {
+				xpos = a;
+			} else if let element::Vector::Pc(a) = e.pos().x() {
+				xpos = a * width;
+			}
+			
+			if let element::Vector::Px(a) = e.pos().y() {
+				ypos = a;
+			} else if let element::Vector::Pc(a) = e.pos().y() {
+				ypos = a * height;
+			}
+			
+			if let element::Vector::Px(a) = e.dim().x() {
+				xdim = a;
+			} else if let element::Vector::Pc(a) = e.dim().x() {
+				xdim = a * width;
+			}
+			
+			if let element::Vector::Px(a) = e.dim().y() {
+				ydim = a;
+			} else if let element::Vector::Pc(a) = e.dim().y() {
+				ydim = a * height;
+			}
+			
 			rectangle(
 				e.color(),
 				[
-					e.pos().x(),
-					e.pos().y(),
-					e.dim().x(),
-					e.dim().y(),
+					xpos,
+					ypos,
+					xdim,
+					ydim,
 				],
 				c.transform,g
 			);
@@ -94,7 +127,12 @@ pub fn draw_ui(w: &mut PistonWindow, e: &Event, base_ui: &Vec<element::Element>)
 					line(
 						*color,
 						1.0,
-						[e.pos().x(), e.pos().y(), e.pos().x()+e.dim().x(), e.pos().y()],
+						[
+							xpos+(xdim * patterns[i][0]),
+							ypos+(ydim * patterns[i][1]),
+							xpos+(xdim * patterns[i][2]),
+							ypos+(ydim * patterns[i][3]),
+						],
 						c.transform,g,
 					);
 				}
